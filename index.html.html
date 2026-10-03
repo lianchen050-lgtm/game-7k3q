@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>小潔失蹤案 - 網頁解謎遊戲</title>
+<style>
+:root{--bg:#eef2f7;--phone:#f5f9fc;--card:#fff;--primary:#a0c4ff;--text:#4a5568;--sub:#718096;--line:#e2e8f0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a202c;--phone:#2d3748;--card:#3a4558;--text:#e2e8f0;--sub:#a0aec0;--line:#4a5568}}
+:root[data-theme="dark"]{--bg:#1a202c;--phone:#2d3748;--card:#3a4558;--text:#e2e8f0;--sub:#a0aec0;--line:#4a5568}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Roboto,Helvetica,Arial,sans-serif}
+body{background:var(--bg);margin:0;padding:10px;display:flex;justify-content:center;align-items:center;min-height:100vh;color:var(--text)}
+#phone{width:100%;max-width:360px;height:680px;background:#fff;border:10px solid #333;border-radius:35px;box-shadow:0 15px 30px rgba(0,0,0,.15);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.status{height:25px;background:var(--phone);display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:11px;font-weight:bold}
+.screen{flex:1;display:none;flex-direction:column;background:var(--phone);overflow-y:auto;padding:15px}
+.screen.active{display:flex}
+#screen-intro{background:#000;color:#fff;justify-content:center;align-items:center;text-align:center}
+.intro-text{line-height:1.8;margin-bottom:25px;font-size:14px;padding:0 10px}
+.btn-start{background:#fff;color:#000;border:none;padding:10px 25px;border-radius:20px;font-size:15px;font-weight:bold;cursor:pointer}
+#screen-home{background:linear-gradient(135deg,#e8f0fe,#fef0f6);padding:20px 10px;color:#4a5568}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px 10px;text-align:center;margin-top:15px}
+.icon-w{display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.icon{width:55px;height:55px;border-radius:12px;display:flex;justify-content:center;align-items:center;font-size:26px;box-shadow:0 3px 8px rgba(0,0,0,.06)}
+.icon-name{font-size:11px;margin-top:6px;font-weight:500;color:#555}
+.badge{background:rgba(255,255,255,.9);border:1px solid var(--primary);padding:4px 10px;border-radius:15px;font-size:12px;align-self:center;margin-bottom:8px;font-weight:bold;cursor:pointer;color:#4a5568}
+.hdr{display:flex;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.back{background:none;border:none;font-size:18px;cursor:pointer;padding:0 8px 0 0;color:#6b9cf0}
+.hdr h3{font-size:16px;margin:0}
+.card{background:var(--card);padding:10px;border-radius:8px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.05);text-align:left;font-size:13px;line-height:1.5}
+.card.click{cursor:pointer;border:1px dashed var(--primary)}
+.date{font-size:11px;color:var(--sub);margin-bottom:3px}
+.bubble{max-width:85%;padding:8px 12px;border-radius:12px;margin-bottom:8px;font-size:13px;line-height:1.4;text-align:left}
+.left{background:var(--card);align-self:flex-start;border-bottom-left-radius:2px}
+.right{background:var(--primary);color:#fff;align-self:flex-end;border-bottom-right-radius:2px;cursor:pointer}
+.thumb{background:var(--card);padding:6px;border-radius:8px;text-align:center;margin-bottom:12px;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.05)}
+.ph{height:90px;background:var(--line);display:flex;justify-content:center;align-items:center;font-size:35px;border-radius:6px}
+.cap{font-size:11px;margin-top:5px;color:var(--sub)}
+.modal{display:none;position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:100;justify-content:center;align-items:center;padding:15px}
+.mc{background:var(--card);padding:18px 15px 15px;border-radius:15px;width:100%;max-height:85%;overflow-y:auto;position:relative;font-size:13px;line-height:1.6;text-align:left}
+.mc ul{padding-left:18px;margin:8px 0 0}
+.x{position:absolute;top:6px;right:12px;font-size:22px;cursor:pointer;background:none;border:none;color:var(--text)}
+.item{padding:10px;background:var(--card);border-radius:8px;margin-bottom:8px;border-left:4px solid var(--primary);font-size:13px;cursor:pointer;text-align:left}
+.gates{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;text-align:center}
+.gate{background:var(--line);color:var(--text);border:1px solid var(--sub);padding:8px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:13px}
+.scene{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:15px}
+.obj{background:var(--card);padding:15px;border-radius:10px;text-align:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.06);font-size:13px}
+input[type=text]{width:100%;padding:10px;border:2px solid var(--line);background:var(--card);color:var(--text);border-radius:8px;margin-top:8px;font-size:13px;outline:none}
+.btn{background:#6b9cf0;color:#fff;border:none;width:100%;padding:10px;border-radius:8px;font-size:14px;font-weight:bold;margin-top:8px;cursor:pointer}
+.msg{margin-top:10px;font-size:13px;min-height:20px;text-align:left}
+.p{font-size:13px;line-height:1.7;text-align:left;margin:0 0 6px}
+.ending{line-height:1.7;font-size:13px;text-align:left}
+#toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:8px 14px;border-radius:18px;font-size:12px;z-index:200;display:none;max-width:90%;text-align:center}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div class="status"><span style="color:#4a5568">9:03 AM</span><span style="color:#4a5568">📶 🔋 23%</span></div>
+
+  <div id="screen-intro" class="screen active">
+    <div class="intro-text"><strong>2026 / 10 / 02</strong><br><br>小潔今天早上沒有到學校。<br>爸爸媽媽已經聯絡她超過一小時，<br>電話始終無人接聽。<br><br>最後，他們在她的書桌上<br>找到了這支忘記帶出門的手機……<br>手機並未鎖定。<br><br>也許，你能從裡面找出她去哪裡的線索。</div>
+    <button class="btn-start" onclick="go('screen-home')">開始調查 📱</button>
+  </div>
+
+  <div id="screen-home" class="screen">
+    <div class="badge" onclick="showClues()">🔍 線索進度 (<span id="clue-count">0</span>/6)</div>
+    <div class="grid">
+      <div class="icon-w" onclick="go('app-notes')"><div class="icon" style="background:#fff9e6">📝</div><div class="icon-name">備忘錄</div></div>
+      <div class="icon-w" onclick="go('app-photos')"><div class="icon" style="background:#e6f9ff">📷</div><div class="icon-name">相簿</div></div>
+      <div class="icon-w" onclick="go('app-maps')"><div class="icon" style="background:#e6ffe6">🗺️</div><div class="icon-name">地圖</div></div>
+      <div class="icon-w" onclick="go('app-messages')"><div class="icon" style="background:#e6e6ff">💬</div><div class="icon-name">訊息</div></div>
+      <div class="icon-w" onclick="go('app-calendar')"><div class="icon" style="background:#ffe6e6">📅</div><div class="icon-name">行事曆</div></div>
+      <div class="icon-w" onclick="go('app-music')"><div class="icon" style="background:#fde6ff">🎵</div><div class="icon-name">音樂</div></div>
+      <div class="icon-w" onclick="go('app-weather')"><div class="icon" style="background:#fff0e6">🌤️</div><div class="icon-name">天氣</div></div>
+      <div class="icon-w" onclick="toast('設定功能已被家長鎖定。')"><div class="icon" style="background:#edf2f7">⚙️</div><div class="icon-name">設定</div></div>
+    </div>
+  </div>
+
+  <div id="app-notes" class="screen">
+    <div class="hdr"><button class="back" onclick="go('screen-home')">◀</button><h3>備忘錄</h3></div>
+    <div class="card"><div class="date">9月9日 - 我的生日 🎂</div>今天真是開心的一天！也是我的生日！爸爸媽媽買了我最喜歡的草莓蛋糕給我吃，好幸福。</div>
+    <div class="card click" onclick="unlock('回憶')"><div class="date">9月24日 ⭐點擊收集線索</div>今天放學的時候，不小心經過了<strong>以前常去的地方</strong>。真的好久好久沒有去了。</div>
+  </div>
+
+  <div id="app-photos" class="screen">
+    <div class="hdr"><button class="back" onclick="go('screen-home')">◀</button><h3>相簿</h3></div>
+    <div class="thumb" onclick="showPhoto('🎂 草莓蛋糕','爸爸媽媽特地排隊買的草莓蛋糕！超好吃！','🎁')"><div class="ph">🎂</div><div class="cap">9/9 生日蛋糕</div></div>
+    <div class="thumb" onclick="openParkPhoto()"><div class="ph">🌳</div><div class="cap">9/24 舊地重遊 (點擊有線索)</div></div>
+  </div>
+
+  <div id="app-maps" class="screen">
+    <div class="hdr"><button class="back" onclick="go('screen-home')">◀</button><h3>地圖搜尋</h3></div>
+    <p class="p">📍 最近搜尋紀錄：</p>
+    <div class="item" onclick="enterPark()">🔍 幸福公園 (點擊前往探索)</div>
+    <div class="item" onclick="enterBookstore()">🔍 星光書店 (點擊前往探索)</div>
+  </div>
+
+  <div id="app-messages" class="screen">
+    <div class="hdr"><button class="back" onclick="go('screen-home')">◀</button><h3>訊息對話</h3></div>
+    <p class="date" style="text-align:center">【與同學小玲的對話】</p>
+    <div class="bubble left">妳明天真的還要去那裡嗎？</div>
+    <div class="bubble right" onclick="unlock('神祕行程')">我要先去一個重要的地方拿個東西。<br><small>(✔點擊收集線索)</small></div>
+    <div class="bubble left">去哪裡啊？</div>
+    <div class="date" style="text-align:right">[已讀未回覆]</div>
+  </div>
+
+  <div id="app-calendar" class="screen">
+    <div class="hdr"><button class="back" onclick="go('screen-home')">◀</button><h3>行事曆</h3></div>
+    <div class="card"><div class="date">今天 10月2日 (上學日)</div>08:00 出門上學</div>
+    <div class="card click" onclick="unlock('備忘提醒')">❗ 點擊查看提醒：不要忘記帶「那個」出門。</div>
+  </div>
+
+  <div id="app-music" class="screen">
+    <div class="hdr"><button class="back" onclick="go('screen-home')">◀</button><h3>音樂播放器</h3></div>
+    <div class="card click" onclick="unlock('回家的路')">🎵 回家的路 (輕音樂) - 播放 37 次<br>💡 小潔備註：「每次聽到這首歌，就會想起小時候跟爸爸媽媽走在那條路上的感覺...」</div>
+  </div>
+
+  <div id="app-weather" class="screen">
+    <div class="hdr"><button class="back" onclick="go('screen-home')">◀</button><h3>天氣預報</h3></div>
+    <div class="card" style="text-align:center;font-size:14px"><div style="font-size:48px">🌧️</div>降雨機率 80%<br><strong>大雨特報</strong></div>
+  </div>
+
+  <div id="stage-park-gate" class="screen">
+    <div class="hdr"><button class="back" onclick="go('app-maps')">◀ 返回</button><h3>幸福公園 - 入口</h3></div>
+    <p class="p">公園非常大，小潔是從哪一個門進去的？（提示：比對相簿裡公園照片的特徵）</p>
+    <div class="card">北門：有大噴水池<br>東門：有一片大草皮<br>南門：靠馬路，有一台紅色販賣機</div>
+    <div class="gates">
+      <button class="gate" onclick="checkGate('北門')">🔵 北門</button>
+      <button class="gate" onclick="checkGate('東門')">🟢 東門</button>
+      <button class="gate" onclick="checkGate('南門')">🔴 南門</button>
+    </div>
+    <div id="park-gate-msg" class="msg"></div>
+  </div>
+
+  <div id="stage-park-inside" class="screen">
+    <div class="hdr"><h3>幸福公園 - 南門長椅</h3></div>
+    <p class="p">大雨中空無一人，小潔在這裡留下了什麼？點擊物品搜索：</p>
+    <div class="scene">
+      <div class="obj" onclick="toast('老樹的樹幹被雨水打濕了，什麼也沒有。')">🌳 老樹</div>
+      <div class="obj" onclick="exploreChair()">🪑 長椅</div>
+      <div class="obj" onclick="toast('販賣機嗡嗡作響，沒有可疑之處。')">🥤 販賣機</div>
+    </div>
+    <div id="park-inside-msg" class="msg"></div>
+  </div>
+
+  <div id="stage-reasoning" class="screen">
+    <div class="hdr"><h3>💡 核心動機推理</h3></div>
+    <p class="p">小潔為什麼要在暴雨的上學日清晨跑來這裡？</p>
+    <p class="p" style="color:var(--sub)">請輸入簡短答案（提示：日記跟音樂都提到的四個字「童年回憶」）：</p>
+    <input type="text" id="reasoning-input" placeholder="輸入答案…">
+    <button class="btn" onclick="checkReasoning()">提交答案</button>
+    <div id="reasoning-msg" class="msg"></div>
+  </div>
+
+  <div id="stage-bookstore" class="screen">
+    <div class="hdr"><button class="back" onclick="go('app-maps')">◀ 返回</button><h3>星光書店</h3></div>
+    <div style="font-size:60px;text-align:center;margin:20px 0">📚</div>
+    <p class="p">你發現「星光書店」就在附近。這是她小時候最愛跟爸媽來的地方，你決定立刻進入尋找！</p>
+    <button class="btn" onclick="triggerEnding()">🚪 進入書店</button>
+  </div>
+
+  <div id="screen-ending" class="screen">
+    <div class="hdr"><h3>🌟 溫暖結局</h3></div>
+    <div id="ending-content" class="ending"></div>
+    <button class="btn" onclick="resetGame()">🔄 重新遊玩</button>
+  </div>
+
+  <div id="modal-clues" class="modal"><div class="mc"><button class="x" onclick="closeModal('modal-clues')">×</button><strong>🗂️ 已收集線索</strong><ul id="clues-list"></ul></div></div>
+  <div id="modal-photo" class="modal"><div class="mc"><button class="x" onclick="closeModal('modal-photo')">×</button>
+    <strong id="mp-title"></strong>
+    <div class="ph" id="mp-img" style="margin:10px 0"></div>
+    <div id="mp-desc"></div><div id="mp-action"></div></div></div>
+  <div id="toast"></div>
+</div>
+
+<script>
+const clues = new Set();
+let reasoned = false, tt;
+const dict = {
+  '回憶':'✓【日記】：幸福公園是她以前常去的地方。',
+  '神祕行程':'✓【訊息】：上學前要先去一個重要的地方拿東西。',
+  '備忘提醒':'✓【行事曆】：提醒自己帶「那個」出門。',
+  '回家的路':'✓【音樂】：《回家的路》聽了37次，承載與父母的回憶。',
+  '幸福公園':'✓【相簿】：確認地點是幸福公園，背景有紅色販賣機。',
+  '粉紅髮圈':'✓【現場】：在公園長椅找到小潔遺落的粉紅髮圈。'
+};
+const $ = id => document.getElementById(id);
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');}
+function closeModal(id){$(id).style.display='none';}
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(tt);tt=setTimeout(()=>e.style.display='none',2200);}
+function unlock(k){
+  if(!clues.has(k)){clues.add(k);$('clue-count').innerText=clues.size;toast('🔍 獲得線索：【'+k+'】！');}
+  else toast('這條線索你已經收集過了。');
+}
+function showClues(){
+  const l=$('clues-list');l.innerHTML='';
+  if(!clues.size) l.innerHTML='<li>還沒找到線索，多去翻翻 App 吧！</li>';
+  else clues.forEach(c=>{l.innerHTML+='<li>'+dict[c]+'</li>';});
+  $('modal-clues').style.display='flex';
+}
+function showPhoto(t,d,e){
+  $('mp-title').innerText=t;$('mp-desc').innerText=d;$('mp-img').innerText=e;$('mp-action').innerHTML='';
+  $('modal-photo').style.display='flex';
+}
+function openParkPhoto(){
+  showPhoto('🌳 9/24 公園照片','照片右邊有一台紅色販賣機。點下方按鈕看細節。','🌳 🔴');
+  $('mp-action').innerHTML='<button class="btn" onclick="zoomPark()">🔍 查看小藍牌</button>';
+}
+function zoomPark(){
+  unlock('幸福公園');
+  $('mp-desc').innerHTML='長椅旁牌子寫著：幸福公園。<br>特徵：這裡有台紅色販賣機！';
+  $('mp-action').innerHTML='';
+}
+function enterPark(){
+  if(!clues.has('幸福公園')) toast('❌ 你還不知道她去了哪個公園，請去「相簿」找線索。');
+  else go('stage-park-gate');
+}
+function enterBookstore(){
+  if(!reasoned) toast('❌ 還不確定小潔的動機，先去公園調查吧。');
+  else go('stage-bookstore');
+}
+function checkGate(g){
+  const m=$('park-gate-msg');
+  if(g==='南門'){
+    m.style.color='#48bb78';m.innerText='⭕ 答對了！南門有紅色販賣機。前往公園內部...';
+    setTimeout(()=>{go('stage-park-inside');m.innerText='';},1200);
+  }else{m.style.color='#e53e3e';m.innerText='❌ 特徵不符，再想想！';}
+}
+function exploreChair(){
+  unlock('粉紅髮圈');
+  $('park-inside-msg').innerHTML='<p>🎀 <strong>你找到了「粉紅色髮圈」！</strong></p><button class="btn" onclick="go(\'stage-reasoning\')">🧠 進入動機推理</button>';
+}
+function checkReasoning(){
+  const v=$('reasoning-input').value.trim(), m=$('reasoning-msg');
+  if(v==='童年回憶'||v==='回憶'){
+    reasoned=true;m.style.color='#48bb78';m.innerText='✨ 推理正確！地圖上的「星光書店」已解鎖！';
+    setTimeout(()=>go('app-maps'),1200);
+  }else{m.style.color='#e53e3e';m.innerText='❌ 答案不對，請輸入「童年回憶」。';}
+}
+function triggerEnding(){
+  go('screen-ending');
+  $('ending-content').innerHTML='在星光書店泛黃的燈光下，你找到了小潔。她的手機已經沒電。解謎成功！<br><br>在她身旁擺著一本《月亮回家的那一天》，裡面夾著她特地帶出來的舊書籤。<br><br>這時趕來的爸爸媽媽把小潔抱在懷裡。小潔說：『對不起，最近上學壓力很大，我只是突然很想念小時候你們陪我讀這本書的感覺...』<br><br>爸爸溫柔地說：『傻孩子，想看隨時跟我們說，我們再陪妳讀。』<br><br><strong>【小潔已安全回家 · 溫暖結局】</strong>💗';
+}
+function resetGame(){
+  clues.clear();reasoned=false;$('clue-count').innerText=0;
+  $('park-gate-msg').innerText='';$('park-inside-msg').innerHTML='';
+  $('reasoning-msg').innerText='';$('reasoning-input').value='';
+  go('screen-intro');
+}
+</script>
+</body>
+</html>
